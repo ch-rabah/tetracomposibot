@@ -2,18 +2,19 @@
 #
 # Binome:
 #  Prénom Nom No_étudiant/e : Rabah CHELALI 21315151
-#  Prénom Nom No_étudiant/e : _________
+#  Prénom Nom No_étudiant/e : Anis SAFAR 21304587
 #
 # check robot.py for sensor naming convention
 # all sensor and motor value are normalized (from 0.0 to 1.0 for sensors, -1.0 to +1.0 for motors)
 
 from robot import * 
+import math
 
 nb_robots = 0
 
 class Robot_player(Robot):
 
-    team_name = "Challenger_Rabah"  # vous pouvez modifier le nom de votre équipe
+    team_name = "Challenger_Rabah/_Anis"  # vous pouvez modifier le nom de votre équipe
     robot_id = -1             # ne pas modifier. Permet de connaitre le numéro de votre robot.
     memory = 0                # vous n'avez le droit qu'a une case mémoire qui doit être obligatoirement un entier
 
@@ -40,8 +41,14 @@ class Robot_player(Robot):
 
         return tran, rot
 
+    def strategy3(self, sensors, sensor_view, sensor_robot, sensor_team):
+        self.param=[-1, 0, 1, 1, 1, 1, -1, -1]
+        tran = math.tanh ( self.param[0] + self.param[1] * sensors[sensor_front_left] + self.param[2] * sensors[sensor_front] + self.param[3] * sensors[sensor_front_right] )
+        rot = math.tanh ( self.param[4] + self.param[5] * sensors[sensor_front_left] + self.param[6] * sensors[sensor_front] + self.param[7] * sensors[sensor_front_right] )
+        return tran, rot
+
     def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):
-        k = self.robot_id % 2
+        k = self.robot_id % 3
 
         sensor_to_wall = []
         sensor_to_robot = []

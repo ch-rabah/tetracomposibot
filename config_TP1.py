@@ -22,11 +22,12 @@ display_time_stats = True
 
 import robot_braitenberg_avoider
 import robot_dumb
+import robot_test2
 
 def initialize_robots(arena_size=-1, particle_box=-1): # particle_box: size of the robot enclosed in a square
     #x_center = arena_size // 2 - particle_box / 2
     y_center = arena_size // 2 - particle_box / 2
     robots = []
-    robots.append(robot_braitenberg_avoider.Robot_player(4, y_center, 0, name="My Robot", team="A"))
+    robots.append(robot_test2.Robot_player(4, y_center, 0, name="My Robot", team="A"))
     #robots.append(robot_dumb.Robot_player(y_center, y_center, 0, name="My Robot", team="A"))
     return robots
