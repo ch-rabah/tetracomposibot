@@ -16,9 +16,10 @@ class Robot_player(Robot):
         self.robot_id = nb_robots
         nb_robots+=1
         
-        self.param=[-1, 0, 1, 1, 1, 1, -1, -1]
-        #self.param=[1, 1, -1, 1, -1, 1, 1, -1]
-        #self.param=[0, 1, 1, 1, -1, 1, 1, -1]
+        self.param=[-3, 5, 9, 8, 4, 10, -5, -8]
+        #[9, -5, 7, 3, -4, 3, 4, -3]#[1, 8, -8, 5, 3, 5, 2, -10]
+        #self.param=[-1, 0, 1, 1, 1, 1, -1, -1]
+
         super().__init__(x_0, y_0, theta_0, name=name, team=team)
 
     def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):

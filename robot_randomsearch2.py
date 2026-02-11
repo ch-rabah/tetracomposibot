@@ -64,7 +64,7 @@ class Robot_player(Robot):
                     self.score_best = somme
                     self.bestParam=self.param
                 if self.nb_essai ==2 :
-                    self.param = [random.randint(-1, 1) for i in range(8)]
+                    self.param = [random.randint(-10, 10) for i in range(8)]
                     self.trial = self.trial + 1
                     print ("Trying strategy no.",self.trial)
                     self.iteration = self.iteration + 1

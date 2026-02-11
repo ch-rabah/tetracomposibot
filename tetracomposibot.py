@@ -5,7 +5,6 @@
 # "With the Tetracomposibot it has now become possible to play and compose REAL simple robot demo"
 
 # UE IA & JEUX - L3, SU
-# LU3IN025 "introduction à l'IA", partie Robotique
 # Projet: https://github.com/nekonaute/SU-LU3IN025-robots/blob/main/instructions_projet.md
 
 # contact  : nicolas.bredeche@sorbonne-universite
