@@ -9,6 +9,7 @@
 
 from robot import * 
 import math
+import random
 
 nb_robots = 0
 
@@ -25,45 +26,11 @@ class Robot_player(Robot):
         super().__init__(x_0, y_0, theta_0, name="Robot "+str(self.robot_id), team=self.team_name)
 
 
-    def strategy3(self, sensors, sensor_view, sensor_robot, sensor_team):
-        # strategie qui permet de suivre le mur pour faire le tour de l'arène
-        tran = 0.6 * sensors[sensor_front] + 0.2
-        rot  = (sensors[sensor_left] + sensors[sensor_front_left]) - (sensors[sensor_right] + sensors[sensor_front_right])
-        return tran, rot
-    
-    def strategy2(self, sensors, sensor_view, sensor_robot, sensor_team):
-        # strategie qui permet d'eviter un obstacle
-        #tran =  sensors[sensor_front] + 0.2
-        #rot = 1 - sensors[sensor_front] + sensors[sensor_left] + sensors[sensor_front_left] - sensors[sensor_right] - sensors[sensor_front_right]
-        translation = sensors[sensor_front]*0.1+0.2
-        rotation = 0.2 * sensors[sensor_left] + 0.2 * sensors[sensor_front_left] - 0.2 * sensors[sensor_right] - 0.2 * sensors[sensor_front_right] + (random.random()-0.5)*1. #+ sensors[sensor_front] * 0.1
-        
-        return tran, rot
-
-    def strategy1(self, sensors, sensor_view, sensor_robot, sensor_team):
-
-        self.param=[-3, 5, 9, 8, 4, 10, -5, -8]#[1, 8, -8, 5, 3, 5, 2, -10]
-        tran = math.tanh ( self.param[0] + self.param[1] * sensors[sensor_front_left] + self.param[2] * sensors[sensor_front] + self.param[3] * sensors[sensor_front_right] )
-        rot = math.tanh ( self.param[4] + self.param[5] * sensors[sensor_front_left] + self.param[6] * sensors[sensor_front] + self.param[7] * sensors[sensor_front_right] )
-        return tran, rot
-
-    def strategy4(self, sensors, sensor_view, sensor_robot, sensor_team):
-        l=[[7,-8,-6.5,-8,0,8.5,8,8.5],[-3, 5, 9, 8, 4, 10, -5, -8],[1, 8, -8, 5, 3, 5, 2, -10]]
-        n=random.randint(0,2)
-        param=l[n]
-        tran = math.tanh ( self.param[0] + self.param[1] * sensors[sensor_front_left] + self.param[2] * sensors[sensor_front] + self.param[3] * sensors[sensor_front_right] )
-        rot = math.tanh ( self.param[4] + self.param[5] * sensors[sensor_front_left] + self.param[6] * sensors[sensor_front] + self.param[7] * sensors[sensor_front_right] )
-        return tran, rot
-
-
-   
-
-
     def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):
         
-        sensor_to_wall = [] #liste des sensors en ne prennant en compte que les murs
-        sensor_to_robot = [] #liste des sensors en ne prennant en compte que les robots
-        sensor_to_advrobot= [] #liste des sensors en ne prennant en compte que les robots adverses
+        sensor_to_wall = [] #liste des sensors des murs uniquement
+        sensor_to_robot = [] #liste des sensors des robots (adv/team)
+        sensor_to_advrobot= [] #liste des sensors des robots adv
         
         for i in range (0,8): #remplissage des listes 
             if  sensor_view[i] == 1:
@@ -84,32 +51,45 @@ class Robot_player(Robot):
                 sensor_to_advrobot.append(1.0)
 
         def is_near():
+            """retourne vrai si un mur/robot est proche"""
             return sensors[sensor_front] <= 0.15 or sensors[sensor_front_left] <= 0.15 or sensors[sensor_front_right] <= 0.15
+
         def is_wall_far():
-            return sensor_to_wall[sensor_right] >= 0.8 and sensor_to_wall[sensor_rear_right] >= 0.8
+            """retourne vrai si un mur est un peu loin"""
+            return sensor_to_wall[sensor_right] >= 0.7 and sensor_to_wall[sensor_rear_left] >= 0.7
+        
         def is_adv_near():
+            """retourne vrai si un robot adversaire est proche"""
             return len([1 for i in sensor_to_advrobot if i != 1.0 ]) >=1
         
         def not_adv_near():
+            """retourne vrai si y a un mur ou un robot de meme equipe est proche mais pas un robot adversaire"""
             for i in range(8):
                 if sensors[i] <= 0.2 and sensor_to_advrobot[i] == 1.0 :
                     return True
             return False
         
-        def is_ally_near() :
+        def is_teammate_near() :
+            """retourne vrai si un robot de meme equipe est proche""" 
             for i in range(8):
                 if sensor_to_robot[i] <= 0.2 and sensor_team[i] == self.team_name:
                     return True
             return False
 
         def danger_list(sensor_list):
+            """permet d'eviter un objet dont le sensor est donné en parametre"""
             w =  [7, -8, -6, -8, 0, 8, 6, 8]
             rotation = 0
             for i in range(8):
                 rotation += ((1 - sensor_list[i]) * w[i])*(random.random()*0.2)
             return rotation 
 
+        
+        
+
+
         def follow_wall(sensor_list):
+            """permet de suivre un mur"""
             w = [6.2,-8,5,0,0,0,-6.8,9.2]
             rotation = 0
             for i in range(8):
@@ -117,21 +97,42 @@ class Robot_player(Robot):
             return rotation
         
         def follow_list(sensor_list):
+            """permet de suivre un objet dont le sensor est donné en parametre"""
             w = [7.0, -8, -6.5, -8, 0, 8.5, 8, 8.5]
             rotation = 0
             for i in range(8):
                 rotation += (1-sensor_list[i])*w[i]
             return rotation
 
+        def is_blocked() :
+            """retourne vrai si le robot est bloque"""
+            return (sensors[sensor_front] <= 0.08 and sensors[sensor_front_left] <= 0.12 and sensors[sensor_front_right] <= 0.12)
+
         if self.memory == 0:
             if self.robot_id==0:
-                self.memory = 1
+                self.memory = 1 # un robot qui suit le mur 
             else :
-                self.memory = 0
+                self.memory = 2 # mode attaque
+
+        translation = sensors[sensor_front] + sensors[sensor_front_left] + sensors[sensor_front_right]
+        
+        if self.memory != 3 and is_blocked():
+            self.memory = 3 #mode anti-bloquage
+        
+        
+        
 
         
-        translation = sensors[sensor_front] + sensors[sensor_front_left] + sensors[sensor_front_right]
-        if self.memory ==1:#mode passifique suivi de mur
+        if self.memory == 3:#mode anti-bloquage
+            translation = -0.2 #recule
+            rotation = danger_list(sensor_to_wall)* (0.8 + random.random()*0.4)
+
+            # sortir de mode anti-bloquage
+            if sensors[sensor_front] > 0.25 and sensors[sensor_front_left] > 0.25 and sensors[sensor_front_right] > 0.25  :
+                self.memory = 1 if self.robot_id == 0 else 2
+
+        
+        elif self.memory ==1:#mode suivi de mur
             if is_near():
                 rotation = danger_list(sensor_to_wall)
                 translation = sensors[sensor_front]*0.5+0.2
@@ -141,16 +142,16 @@ class Robot_player(Robot):
             else:
                 rotation = 0.5 * follow_wall(sensor_to_wall)
                 translation = sensors[sensor_front]*0.9+0.3
-            
+
             if random.random() < 0.02:   
                 self.memory = 2
 
-        else:#mode aggressif 
+        else:#mode attaque
             if not_adv_near():
                 rotation = danger_list(sensors)
             else:
                 if is_adv_near():
-                    if is_ally_near():
+                    if is_teammate_near():
                         #evite que deux robots en bloque qu'un seul
                         rotation = danger_list(sensors)
                     else:
@@ -158,11 +159,11 @@ class Robot_player(Robot):
                 else:
                     rotation = danger_list(sensors)
         
-            if is_ally_near():
+            if is_teammate_near():
                 #evite que deux robots en bloque qu'un seul
                 rotation = danger_list(sensors)
 
-            if random.random() < 0.02:   
+            if random.random() < 0.08:   
                 self.memory = 1
 
         
